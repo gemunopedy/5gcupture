@@ -10,7 +10,7 @@ read num
 
 case $num in
   1) tshark -r $PCAP_PATH -V 'nas_5gs.mm.message_type==0x41 && ngap.InitialUEMessage_element' | grep -A 10000 "NG Application Protocol" > registration_request.txt
-     tshark -r $PCAP_PATH -V 'http2.header.value matches "post" && http2.header.value matches "auth"' 
+     tshark -r $PCAP_PATH -V 'http2.header.value matches "post" && http2.header.value matches "auth"'  | grep -A 97 "HyperText Transfer Protocol 2" | head -n 98 > nausf_ueauthentication_request.txt
     # Registration Request
     MESSAGE_TYPE_1=`grep -e "Message type:" ./registration_request.txt | sed 's/^[ \t]*//' | cut -d " " -f 3-4`
     RAN_UE_NGAP_ID_1=`grep -e "RAN-UE-NGAP-ID:" registration_request.txt | sed 's/^[ \t]*//' | cut -d " " -f 2`
