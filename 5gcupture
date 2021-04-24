@@ -10,30 +10,41 @@ read num
 
 case $num in
   1) tshark -r $PCAP_PATH -V 'nas_5gs.mm.message_type==0x41 && ngap.InitialUEMessage_element' | grep -A 10000 "NG Application Protocol" > registration_request.txt;
-     echo "Registration Request(Initial UE Message)
-+--------------------+----------+---------+
-| IE/Group Name      | Presence | caputer |
-+--------------------+----------+---------+
-| Message Type       | M        |         |
-+--------------------+----------+---------+
-| RAN UE NGAP ID     | M        |         |
-+--------------------+----------+---------+
-| NAS-PDU            | M        |         |
-+--------------------+----------+---------+
-| User Location      | M        |         |
-| Information        |          |         |
-+--------------------+----------+---------+
-| RRC Establishment  | O        |         |
-| Cause              |          |         |
-+--------------------+----------+---------+
-| 5G-S-TMSI          | O        |         |
-+--------------------+----------+---------+
-| GUAMI              | O        |         |
-+--------------------+----------+---------+
-| AMF Set ID         | O        |         |
-+--------------------+----------+---------+
-| UE Context Request | O        |         |
-+--------------------+----------+---------+
+    MESSAGE_TYPE_1=`grep -e "Message type:" ./registration_request.txt | sed 's/^[ \t]*//' | cut -d " " -f 3-4`
+    RAN_UE_NGAP_ID_1=`grep -e "RAN-UE-NGAP-ID:" registration_request.txt | sed 's/^[ \t]*//' | cut -d " " -f 2`
+    NAS_PDU_1=`grep -e "NAS-PDU:" registration_request.txt | sed 's/^[ \t]*//' | cut -d " " -f 2`
+    TAC_1=`grep -e "tAC" registration_request.txt | sed 's/^[ \t]*//' | cut -d " " -f 2`
+    MCC_1=`grep -e "MCC" registration_request.txt | sed 's/^[ \t]*//' | cut -d " " -f6 | uniq | tr -d \( | tr -d \)`
+    MNC_1=`grep -e "MNC" registration_request.txt | sed 's/^[ \t]*//' | cut -d " " -f6 | uniq | tr -d \( | tr -d \)`
+    CELL_1=`grep -e "nRCellIdentity" registration_request.txt | sed 's/^[ \t]*//' | cut -d " " -f2`
+     
+     echo "
+                    Registration Request(Initial UE Message)
+
++-------------------------------+---------------------------------------------------------------+
+| IE/Group Name                 | Presence | caputer                                             
++-------------------------------+---------------------------------------------------------------+
+| Message Type                  | M        | $MESSAGE_TYPE_1                                     
++-------------------------------+---------------------------------------------------------------+
+| RAN UE NGAP ID                | M        | $RAN_UE_NGAP_ID_1                                   
++-------------------------------+---------------------------------------------------------------+
+| NAS-PDU                       | M        | $NAS_PDU_1      
++--------------------+----------+----------+----------------------------------------------------+
+| User Location      | TAI      | M        | PLMN: $MCC_1$MNC_1 TAC: $TAC_1
+| Information        +----------+----------+----------------------------------------------------+
+|                    | NR CGI   | M        | PLMN: $MCC_1$MNC_1 CellID: $CELL_1
++--------------------+----------+----------+----------------------------------------------------+
+| RRC Establishment  | O        |          |
+| Cause              |          |          |
++--------------------+----------+---------------------------------------------------------------+
+| 5G-S-TMSI          | O        |          |
++--------------------+----------+---------------------------------------------------------------+
+| GUAMI              | O        |          |
++--------------------+----------+---------------------------------------------------------------+
+| AMF Set ID         | O        |          |
++--------------------+----------+---------------------------------------------------------------+
+| UE Context Request | O        |          |
++--------------------+----------+---------------------------------------------------------------+
 
 "                           ;;
   2) tshark -r $PCAP_PATH 'http2'
