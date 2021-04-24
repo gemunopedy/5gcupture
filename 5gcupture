@@ -9,7 +9,9 @@ echo -n "Input number:"
 read num
 
 case $num in
-  1) tshark -r $PCAP_PATH -V 'nas_5gs.mm.message_type==0x41 && ngap.InitialUEMessage_element' | grep -A 10000 "NG Application Protocol" > registration_request.txt;
+  1) tshark -r $PCAP_PATH -V 'nas_5gs.mm.message_type==0x41 && ngap.InitialUEMessage_element' | grep -A 10000 "NG Application Protocol" > registration_request.txt
+     tshark -r $PCAP_PATH -V 'http2.header.value matches "post" && http2.header.value matches "auth"' 
+    # Registration Request
     MESSAGE_TYPE_1=`grep -e "Message type:" ./registration_request.txt | sed 's/^[ \t]*//' | cut -d " " -f 3-4`
     RAN_UE_NGAP_ID_1=`grep -e "RAN-UE-NGAP-ID:" registration_request.txt | sed 's/^[ \t]*//' | cut -d " " -f 2`
     NAS_PDU_1=`grep -e "NAS-PDU:" registration_request.txt | sed 's/^[ \t]*//' | cut -d " " -f 2`
@@ -17,34 +19,46 @@ case $num in
     MCC_1=`grep -e "MCC" registration_request.txt | sed 's/^[ \t]*//' | cut -d " " -f6 | uniq | tr -d \( | tr -d \)`
     MNC_1=`grep -e "MNC" registration_request.txt | sed 's/^[ \t]*//' | cut -d " " -f6 | uniq | tr -d \( | tr -d \)`
     CELL_1=`grep -e "nRCellIdentity" registration_request.txt | sed 's/^[ \t]*//' | cut -d " " -f2`
-     
-     echo "
-                    Registration Request(Initial UE Message)
+    RRC_ES_CAUSE_1=`grep -e "RRCEstablishmentCause:" registration_request.txt | sed 's/^[ \t]*//' | cut -d " " -f2`
+    UE_CON_REQ_1=`grep -e "UEContextRequest:" registration_request.txt | sed 's/^[ \t]*//' | cut -d " " -f2`
+    
+    # Nausf_UEAuthentication_Authentication Request
 
-+-------------------------------+---------------------------------------------------------------+
+
+     echo "
+                    1. Registration Request(Initial UE Message)
+
++-------------------------------+----------+----------------------------------------------------+
 | IE/Group Name                 | Presence | caputer                                            |
-+-------------------------------+---------------------------------------------------------------+
++-------------------------------+----------+----------------------------------------------------+
 | Message Type                  | M        | $MESSAGE_TYPE_1                                     
-+-------------------------------+---------------------------------------------------------------+
++-------------------------------+----------+----------------------------------------------------+
 | RAN UE NGAP ID                | M        | $RAN_UE_NGAP_ID_1                                   
-+-------------------------------+---------------------------------------------------------------+
++-------------------------------+----------+----------------------------------------------------+
 | NAS-PDU                       | M        | $NAS_PDU_1      
 +--------------------+----------+----------+----------------------------------------------------+
 | User Location      | TAI      | M        | PLMN: $MCC_1$MNC_1 TAC: $TAC_1
 | Information        +----------+----------+----------------------------------------------------+
 |                    | NR CGI   | M        | PLMN: $MCC_1$MNC_1 CellID: $CELL_1
 +--------------------+----------+----------+----------------------------------------------------+
-| RRC Establishment  | O        |          |
-| Cause              |          |          |
-+--------------------+----------+---------------------------------------------------------------+
-| 5G-S-TMSI          | O        |          |
-+--------------------+----------+---------------------------------------------------------------+
-| GUAMI              | O        |          |
-+--------------------+----------+---------------------------------------------------------------+
-| AMF Set ID         | O        |          |
-+--------------------+----------+---------------------------------------------------------------+
-| UE Context Request | O        |          |
-+--------------------+----------+---------------------------------------------------------------+
+| RRC Establishment Cause       | O        | $RRC_ES_CAUSE_1
++-------------------------------+----------+----------------------------------------------------+
+| 5G-S-TMSI                     | O        |
++-------------------------------+----------+----------------------------------------------------+
+| GUAMI                         | O        |
++-------------------------------+----------+----------------------------------------------------+
+| AMF Set ID                    | O        |
++-------------------------------+----------+----------------------------------------------------+
+| UE Context Request            | O        | $UE_CON_REQ_1
++-------------------------------+----------+----------------------------------------------------+
+
+                    2. Nausf_UEAuthentication_Authentication Request
+
++-------------------------------+----------+----------------------------------------------------+
+| Key                           | Presence | caputer                                            |
++-------------------------------+----------+----------------------------------------------------+
+| Path                          | M        |                                                    
++-------------------------------+----------+----------------------------------------------------+
 
 "                           ;;
   2) tshark -r $PCAP_PATH 'http2'
