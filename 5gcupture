@@ -9,9 +9,32 @@ echo -n "Input number:"
 read num
 
 case $num in
-  1) tshark -r $PCAP_PATH 'ngap';
-     echo "NG SETUP REQUEST
-+------
-|   "                           ;;
+  1) tshark -r $PCAP_PATH -V 'nas_5gs.mm.message_type==0x41 && ngap.InitialUEMessage_element' | grep -A 10000 "NG Application Protocol" > registration_request.txt;
+     echo "Registration Request(Initial UE Message)
++--------------------+----------+---------+
+| IE/Group Name      | Presence | caputer |
++--------------------+----------+---------+
+| Message Type       | M        |         |
++--------------------+----------+---------+
+| RAN UE NGAP ID     | M        |         |
++--------------------+----------+---------+
+| NAS-PDU            | M        |         |
++--------------------+----------+---------+
+| User Location      | M        |         |
+| Information        |          |         |
++--------------------+----------+---------+
+| RRC Establishment  | O        |         |
+| Cause              |          |         |
++--------------------+----------+---------+
+| 5G-S-TMSI          | O        |         |
++--------------------+----------+---------+
+| GUAMI              | O        |         |
++--------------------+----------+---------+
+| AMF Set ID         | O        |         |
++--------------------+----------+---------+
+| UE Context Request | O        |         |
++--------------------+----------+---------+
+
+"                           ;;
   2) tshark -r $PCAP_PATH 'http2'
 esac
