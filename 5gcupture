@@ -1,0 +1,17 @@
+#!/bin/bash
+PCAP_PATH=`find \`pwd\` -name $1`
+echo "1: Registration
+2: Establish
+3: Service Request
+"
+
+echo -n "Input number:"
+read num
+
+case $num in
+  1) tshark -r $PCAP_PATH 'ngap';
+     echo "NG SETUP REQUEST
++------
+|   "                           ;;
+  2) tshark -r $PCAP_PATH 'http2'
+esac
