@@ -11,6 +11,11 @@ read num
 case $num in
   1) tshark -r $PCAP_PATH -V 'nas_5gs.mm.message_type==0x41 && ngap.InitialUEMessage_element' | grep -A 10000 "NG Application Protocol" > registration_request.txt
      tshark -r $PCAP_PATH -V 'http2.header.value matches "post" && http2.header.value matches "auth"'  | grep -A 97 "HyperText Transfer Protocol 2" | head -n 98 > nausf_ueauthentication_request.txt
+      STREAM_ID=`grep -e "Stream Identifier:" nausf_ueauthentication_request.txt | sed 's/^[ \t]*//' | cut -d " " -f 12`
+      STR1="http2.streamid == "
+      STR2=' && json.key contains "Suci"'
+      STR3=$STR1$STREAM_ID$STR2
+     tshark -r $PCAP_PATH -V $STR3 | grep -A 100 "HyperText Transfer Protocol 2" | head -n 21 >> nausf_ueauthentication_request.txt
     # Registration Request
     MESSAGE_TYPE_1=`grep -e "Message type:" ./registration_request.txt | sed 's/^[ \t]*//' | cut -d " " -f 3-4`
     RAN_UE_NGAP_ID_1=`grep -e "RAN-UE-NGAP-ID:" registration_request.txt | sed 's/^[ \t]*//' | cut -d " " -f 2`
@@ -23,8 +28,11 @@ case $num in
     UE_CON_REQ_1=`grep -e "UEContextRequest:" registration_request.txt | sed 's/^[ \t]*//' | cut -d " " -f2`
     
     # Nausf_UEAuthentication_Authentication Request
-
-
+    PATH_1=`grep -e "Header: :path:" nausf_ueauthentication_request.txt | sed 's/^[ \t]*//' | cut -d " " -f3`
+    SUCI_1=`grep -e "suci-" nausf_ueauthentication_request.txt | sed 's/^[ \t]*//' | cut -d " " -f3`
+    NETWORK_NAME_1=`grep -e "5G:" nausf_ueauthentication_request.txt | sed 's/^[ \t]*//' | cut -d " " -f3`
+    
+    # Nausf_UEAuthentication_Authentication Request
      echo "
                     1. Registration Request(Initial UE Message)
 
@@ -57,7 +65,33 @@ case $num in
 +-------------------------------+----------+----------------------------------------------------+
 | Key                           | Presence | caputer                                            |
 +-------------------------------+----------+----------------------------------------------------+
-| Path                          | M        |                                                    
+| Path                          | M        | $PATH_1                                           
++-------------------------------+----------+----------------------------------------------------+
+| supiOrSuci                    | M        | $SUCI_1                                             
++-------------------------------+----------+----------------------------------------------------+
+| servingNetworkName            | M        | $NETWORK_NAME_1                                             
++-------------------------------+----------+----------------------------------------------------+
+| resynchronizationInfo         | O        |                                                    
++-------------------------------+----------+----------------------------------------------------+
+| pei                           | O        |                                                    
++-------------------------------+----------+----------------------------------------------------+
+| traceData                     | O        |                                                    
++-------------------------------+----------+----------------------------------------------------+
+| udmGroupId                    | O        |                                                    
++-------------------------------+----------+----------------------------------------------------+
+| routingIndicator              | O        |                                                    
++-------------------------------+----------+----------------------------------------------------+
+| cagId                         | O        |                                                    
++-------------------------------+----------+----------------------------------------------------+
+
+                    3. Nausf_UEAuthentication_Authentication Response
+
++-------------------------------+----------+----------------------------------------------------+
+| Key                           | Presence | caputer                                            |
++-------------------------------+----------+----------------------------------------------------+
+| Status                        | M        |                                            
++-------------------------------+----------+----------------------------------------------------+
+| Location                      | M        |                                            
 +-------------------------------+----------+----------------------------------------------------+
 
 "                           ;;
