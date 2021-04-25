@@ -45,6 +45,9 @@ case $num in
     AMF_NGAP_ID_1=`grep -e "AMF-UE-NGAP-ID:" authentication_request.txt | sed 's/^[ \t]*//' | cut -d " " -f2`
     RAN_NGAP_ID_2=`grep -e "RAN-UE-NGAP-ID:" authentication_request.txt | sed 's/^[ \t]*//' | cut -d " " -f2`
     NAS_PDU_2=`grep -e "NAS-PDU:" authentication_request.txt | sed 's/^[ \t]*//' | cut -d " " -f2`
+    DISCRI_1=`grep -e "Extended protocol discriminator:" authentication_request.txt | sed 's/^[ \t]*//' | cut -d " " -f4-7`
+    SECURITY_H_1=`grep -e "Security header type:" authentication_request.txt | sed 's/^[ \t]*//' | cut -d " " -f7-12`
+    SHARE_HALF_1=`grep -e "Spare Half Octet:" authentication_request.txt | sed 's/^[ \t]*//' | cut -d " " -f7 | uniq`
 
 
      echo "
@@ -163,12 +166,12 @@ UE(RAN)    AMF        AUSF       UDM
 +-------------------------------+----------+----------------------------------------------------+
 | IE                            | Presence | caputer                                            |
 +-------------------------------+----------+----------------------------------------------------+
-| Extended protocol             | M        |
+| Extended protocol             | M        | $DISCRI_1
 | discriminator                 |          |                                  
 +-------------------------------+----------+----------------------------------------------------+
-| Security header type          | M        |                                  
+| Security header type          | M        | $SECURITY_H_1                        
 +-------------------------------+----------+----------------------------------------------------+
-| Spare half octet              | M        |                                  
+| Spare half octet              | M        | $SHARE_HALF_1                                 
 +-------------------------------+----------+----------------------------------------------------+
 | Authentication request        | M        |
 | message identity              |          |                                  
