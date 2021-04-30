@@ -1,3 +1,2 @@
-#!/bin/sh
-echo "testtest" > /tmp/testtest.txt
+#!/bin/bash
 /opt/homebrew/bin/tshark -r /tmp/analyze.pcap -V 'nas_5gs.mm.message_type==0x41 && ngap.InitialUEMessage_element' | grep -A 10000 "NG Application Protocol" | sed -e 's/^ *//'  > /tmp/registration_request.txt
