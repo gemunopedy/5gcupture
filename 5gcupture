@@ -138,7 +138,7 @@ UE(RAN)    AMF        AUSF       UDM
   |          |          |          |
   |          |          |          |
 
-                    4. Authentication Request(Downlink NAS Transport) : TS24.501 8.2.1.1
+                    4. Authentication Request(Downlink NAS Transport) : TS38.413 9.2.5.2
 
 +-------------------------------+----------+----------------------------------------------------+
 | IE/Group Name                 | Presence | caputer                                            |
